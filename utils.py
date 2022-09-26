@@ -1,6 +1,8 @@
 import numpy as np
+import os,pickle
 import math
 import torch
+import random
 #torch.cuda.set_device(0)
 
 class ReplayBuffer(object):
@@ -14,6 +16,7 @@ class ReplayBuffer(object):
         self.next_state = np.zeros((max_size, state_dim))
         self.reward = np.zeros((max_size, 1))
         self.not_done = np.zeros((max_size, 1))
+        self.buffer = []
         #self.quality_indicator = np.zeros((max_size, 1))
         
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -26,10 +29,15 @@ class ReplayBuffer(object):
         self.next_state[self.ptr] = next_state
         self.reward[self.ptr] = reward
         self.not_done[self.ptr] = 1. - done
-        #self.quality_indicator[self.ptr] = quality
+        if len(self.buffer) < self.max_size:
+            self.buffer.append(None)
+        self.buffer[self.ptr] =(state, action, reward, next_state, done)
         
         self.ptr = (self.ptr + 1) % self.max_size
         self.size = min(self.size + 1, self.max_size)
+
+    def __len__(self):
+        return len(self.buffer)
 
 
     def sample(self, batch_size):
@@ -43,6 +51,12 @@ class ReplayBuffer(object):
             torch.FloatTensor(self.not_done[ind]).to(self.device),
             #torch.FloatTensor(self.quality_indicator[ind]).to(self.device)
         )
+
+    def sample_sac(self, batch_size):
+        batch = random.sample(self.buffer, batch_size)
+        state, action, reward, next_state, done = map(np.stack, zip(*batch))
+        return state, action, reward, next_state, done
+
 
     def save(self, save_folder):
         np.save(f"{save_folder}_state.npy", self.state[:self.size])
@@ -68,6 +82,7 @@ class ReplayBuffer(object):
         self.not_done[:self.size] = np.load(f"{save_folder}_not_done.npy")[:self.size]
         #self.quality_indicator[:self.size] = np.load(f"{save_folder}_quality_indicator.npy")[:self.size]
 
+    
 
 def create_log_gaussian(mean, log_std, t):
     quadratic = -((0.5 * (t - mean) / (log_std.exp())).pow(2))

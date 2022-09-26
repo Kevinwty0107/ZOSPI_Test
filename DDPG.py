@@ -4,9 +4,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-torch.cuda.set_device(0)
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+if device.type == "cuda":
+    torch.cuda.set_device(0)
 
 # Implementation of Deep Deterministic Policy Gradients (DDPG)
 # Paper: https://arxiv.org/abs/1509.02971

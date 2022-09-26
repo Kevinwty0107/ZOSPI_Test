@@ -227,7 +227,7 @@ class SAC(object):
     def train(self, replay_buffer, batch_size=100):
         self.total_it += 1
         # Sample a batch from memory
-        state_batch, action_batch, reward_batch, next_state_batch, mask_batch = replay_buffer.sample(batch_size=batch_size)
+        state_batch, action_batch, reward_batch, next_state_batch, mask_batch = replay_buffer.sample_sac(batch_size=batch_size)
 
         state_batch = torch.FloatTensor(state_batch).to(device)
         next_state_batch = torch.FloatTensor(next_state_batch).to(device)
