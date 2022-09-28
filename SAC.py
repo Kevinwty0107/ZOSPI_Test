@@ -172,7 +172,7 @@ class SAC(object):
         policy,
         automatic_entropy_tuning,
         max_action= None,
-        lr=3e-4,
+        lr=1e-4,
         alpha = 0.2,
         hidden_size=256,
         policy_freq=2,

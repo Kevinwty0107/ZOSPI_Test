@@ -4,19 +4,22 @@ import gym
 import argparse
 import os
 
+import gym_electric_motor as gem
+
 import utils
 import TD3
 import OurDDPG
 import SPI
 import DDPG
 import SAC
-
+import panda_gym
+import gym_longicontrol
 
 # Runs policy for X episodes and returns average reward
 # A fixed seed is used for the eval environment
 def eval_policy(policy, env_name, seed, eval_episodes=10):
     eval_env = gym.make(env_name)
-    eval_env.seed(seed + 100)
+    eval_env.reset()
 
     avg_reward = 0.
     for _ in range(eval_episodes):
@@ -71,7 +74,7 @@ if __name__ == "__main__":
     env = gym.make(args.env)
 
     # Set seeds
-    env.seed(args.seed)
+    env.reset()
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
 
@@ -108,7 +111,7 @@ if __name__ == "__main__":
     elif args.policy == "SAC":
         kwargs["action_space"] = env.action_space
         kwargs["policy"] = "Gaussian"
-        kwargs["automatic_entropy_tuning"] = False
+        kwargs["automatic_entropy_tuning"] = True
         policy = SAC.SAC(**kwargs)
 
 
